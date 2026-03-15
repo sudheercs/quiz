@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBSE Class 12 CS Practice Portal + AI Tutor</title>
+    <title>CBSE Class 12 CS Practice Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .option-btn {
@@ -11,7 +11,8 @@
         }
         .option-btn:hover:not(:disabled) {
             transform: translateX(5px);
-            background-color: #f3f4f6;
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
         }
         .correct {
             background-color: #def7ec !important;
@@ -22,6 +23,14 @@
             background-color: #fde8e8 !important;
             border-color: #f8b4b4 !important;
             color: #9b1c1c !important;
+        }
+        .quiz-tile {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .quiz-tile:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #3b82f6;
         }
         #chat-messages::-webkit-scrollbar {
             width: 4px;
@@ -37,105 +46,150 @@
         .animate-fade { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body class="bg-slate-50 font-sans text-slate-900">
 
-<div id="app" class="flex flex-col lg:flex-row min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-full lg:w-80 bg-slate-800 text-white p-6 shrink-0 lg:sticky lg:top-0 lg:h-screen overflow-y-auto">
-        <h1 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            CS Practice 2025
-        </h1>
-        <nav class="space-y-1" id="nav-container"></nav>
-        
-        <div class="mt-10 pt-6 border-t border-slate-700">
-            <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Study Assistant</h4>
-            <button onclick="toggleChat()" class="w-full flex items-center gap-2 px-4 py-3 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition text-sm">
-                <span>✨ Ask Gemini AI</span>
+<div id="app" class="min-h-screen flex flex-col">
+    <!-- Main Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div onclick="showHome()" class="flex items-center gap-2 cursor-pointer group">
+                <div class="bg-blue-600 p-1.5 rounded-lg group-hover:bg-blue-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-slate-800">CS Practice <span class="text-blue-600">2025</span></span>
+            </div>
+            
+            <button onclick="toggleChat()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-full hover:bg-blue-50 hover:text-blue-600 transition text-sm font-semibold">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                ✨ Ask Gemini AI
             </button>
         </div>
-    </aside>
+    </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-4 md:p-10 flex flex-col items-center">
-        <div id="quiz-container" class="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-            <div id="set-header" class="mb-8 border-b pb-4">
-                <h2 id="set-title" class="text-2xl font-bold text-slate-800">Select a set from the sidebar</h2>
-                <p id="set-description" class="text-gray-500 mt-1">Full Syllabus Practice (10 Questions Per Set)</p>
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-8 md:py-12">
+        
+        <!-- Landing Screen (Dashboard) -->
+        <div id="landing-screen" class="animate-fade">
+            <div class="mb-10 text-center">
+                <h1 class="text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">Question Bank Dashboard</h1>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto">Master the CBSE Class 12 Computer Science syllabus with 150+ curated MCQs across 15 high-yield modules.</p>
+            </div>
+            
+            <div id="tiles-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Tiles generated via JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface Container -->
+        <div id="quiz-container" class="hidden max-w-3xl mx-auto bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 md:p-10 animate-fade">
+            <div id="set-header" class="mb-8 flex justify-between items-start">
+                <div>
+                    <div id="category-badge" class="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider rounded-md mb-2">Python</div>
+                    <h2 id="set-title" class="text-3xl font-black text-slate-900"></h2>
+                </div>
+                <button onclick="showHome()" class="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <!-- Quiz Screen -->
-            <div id="question-screen" class="hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <span id="progress-text" class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span>
-                    <span id="score-text" class="text-sm font-medium text-gray-500">Score: 0</span>
+            <div id="question-screen">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Progress</span>
+                        <span id="progress-text" class="text-lg font-bold text-slate-800"></span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Accuracy</span>
+                        <span id="score-text" class="text-lg font-bold text-blue-600"></span>
+                    </div>
                 </div>
                 
-                <h3 id="question-text" class="text-lg font-semibold mb-6 leading-relaxed"></h3>
-                <div id="options-container" class="space-y-3"></div>
-
-                <div id="ai-explanation-box" class="hidden mt-6 p-4 bg-purple-50 border border-purple-100 rounded-xl animate-fade">
-                    <div class="flex items-center gap-2 mb-2 text-purple-700 font-bold text-sm">
-                        <span>✨ AI Insight</span>
-                        <div id="explainer-loading" class="hidden h-3 w-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                    <p id="ai-explanation-text" class="text-sm text-purple-900 leading-relaxed italic"></p>
+                <div class="mb-8">
+                    <h3 id="question-text" class="text-xl font-bold text-slate-800 leading-snug"></h3>
                 </div>
 
-                <div class="mt-8 flex flex-wrap gap-3 items-center">
-                    <button id="ai-explain-btn" onclick="getAIExplanation()" class="hidden px-5 py-2.5 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition shadow-sm flex items-center gap-2">
+                <div id="options-container" class="space-y-4"></div>
+
+                <!-- Explanation Box -->
+                <div id="ai-explanation-box" class="hidden mt-8 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl animate-fade">
+                    <div class="flex items-center gap-2 mb-3 text-indigo-700 font-black text-sm uppercase tracking-tighter">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        Teacher's Note
+                        <div id="explainer-loading" class="hidden h-3 w-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <p id="ai-explanation-text" class="text-indigo-900 leading-relaxed font-medium"></p>
+                </div>
+
+                <div class="mt-10 flex flex-wrap gap-4 items-center border-t pt-8">
+                    <button id="ai-explain-btn" onclick="getAIExplanation()" class="hidden px-6 py-3 bg-white border-2 border-indigo-200 text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition flex items-center gap-2">
                         ✨ Explain Concept
                     </button>
-                    <button id="next-btn" onclick="nextQuestion()" class="hidden ml-auto px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden ml-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
                         Next Question →
                     </button>
                 </div>
             </div>
 
             <!-- Result Screen -->
-            <div id="result-screen" class="hidden text-center py-10">
-                <div id="result-icon" class="text-6xl mb-4">🎉</div>
-                <h2 class="text-3xl font-bold text-slate-800">Set Completed!</h2>
-                <p class="text-xl my-6 text-gray-600">You scored <span id="final-score" class="font-bold text-blue-600"></span></p>
-                <div class="flex flex-wrap gap-4 justify-center">
-                    <button onclick="restartSet()" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">Retake Set</button>
-                    <button onclick="location.reload()" class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">Try Another Set</button>
+            <div id="result-screen" class="hidden text-center py-12">
+                <div class="relative inline-block mb-6">
+                    <div class="text-8xl mb-4">🏆</div>
+                    <div class="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-black p-2 rounded-full px-3">DONE</div>
                 </div>
-            </div>
+                <h2 class="text-4xl font-black text-slate-900 mb-2">Module Complete!</h2>
+                <p class="text-slate-500 mb-8">Great job on finishing the practice set.</p>
+                
+                <div class="bg-slate-50 p-8 rounded-3xl mb-10 border border-slate-100">
+                    <div class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Final Score</div>
+                    <div id="final-score" class="text-6xl font-black text-blue-600 tracking-tighter"></div>
+                </div>
 
-            <!-- Landing Screen -->
-            <div id="landing-screen" class="text-center py-20">
-                <div class="text-6xl mb-6">📚</div>
-                <h3 class="text-xl font-semibold text-gray-600">CBSE Class 12 CS Practice</h3>
-                <p class="text-gray-400 mt-2">15 specialized sets (150 Questions) covering Python, Networking, and Databases.</p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="restartSet()" class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Retake Module</button>
+                    <button onclick="showHome()" class="px-8 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition">Dashboard</button>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Gemini Chatbot UI -->
-    <div id="ai-chat-widget" class="fixed bottom-4 right-4 w-80 md:w-96 bg-white shadow-2xl rounded-2xl border border-gray-200 flex flex-col hidden z-50 overflow-hidden h-[500px]">
-        <div class="p-4 bg-slate-800 text-white flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
-                <span class="font-bold">✨ Gemini CS Tutor</span>
+    <!-- Gemini Chatbot Widget -->
+    <div id="ai-chat-widget" class="fixed bottom-6 right-6 w-80 md:w-[400px] bg-white shadow-2xl rounded-3xl border border-slate-200 flex flex-col hidden z-50 overflow-hidden h-[550px] animate-fade">
+        <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-lg">G</div>
+                <div>
+                    <div class="font-bold text-sm">Gemini AI Tutor</div>
+                    <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
+                    </div>
+                </div>
             </div>
-            <button onclick="toggleChat()" class="text-slate-400 hover:text-white">
+            <button onclick="toggleChat()" class="text-slate-400 hover:text-white transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            <div class="bg-blue-100 p-3 rounded-lg rounded-tl-none text-sm text-blue-900 self-start max-w-[85%]">
-                Ask me about Python, SQL, Connectivity, or Networking!
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50">
+            <div class="bg-blue-100 p-4 rounded-2xl rounded-tl-none text-sm text-blue-900 self-start max-w-[85%] border border-blue-200 shadow-sm">
+                👋 Hello! I'm your dedicated Computer Science tutor. Stuck on a concept like <strong>Recursion</strong> or <strong>SQL Joins</strong>? Ask away!
             </div>
         </div>
-        <div class="p-3 border-t bg-white">
-            <div class="flex gap-2">
-                <input type="text" id="chat-input" placeholder="Type your question..." class="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="if(event.key === 'Enter') sendMessage()">
-                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">
+        <div class="p-4 bg-white border-t">
+            <div class="relative">
+                <input type="text" id="chat-input" placeholder="Ask a question..." class="w-full pl-4 pr-12 py-3 bg-slate-100 border-none rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                     </svg>
@@ -148,232 +202,188 @@
 <script>
     const apiKey = ""; 
 
+    // Full Syllabus Data (15 Sets)
     const quizData = [
-        {
-            title: "Set 1: Python Review",
-            questions: [
-                { q: "Which of the following is an invalid identifier?", a: ["_total", "1st_name", "Salary", "None"], c: 1 },
-                { q: "What is the output of 14 // 3?", a: ["4", "4.66", "2", "4.0"], c: 0 },
-                { q: "Which is an immutable type?", a: ["List", "Set", "Tuple", "Dictionary"], c: 2 },
-                { q: "Value of '2' + '3'?", a: ["5", "'5'", "'23'", "Error"], c: 2 },
-                { q: "d = {'a':1}. What is d.get('b', 0)?", a: ["0", "None", "Error", "1"], c: 0 },
-                { q: "Output of 'Hello'[1:3]?", a: ["He", "el", "ell", "lo"], c: 1 },
-                { q: "Which operator has the highest precedence?", a: ["+", "*", "**", "/"], c: 2 },
-                { q: "Output of bool([])?", a: ["True", "False", "None", "Error"], c: 1 },
-                { q: "Which function converts a string to a list of characters?", a: ["split()", "list()", "join()", "strip()"], c: 1 },
-                { q: "Result of 10 % 3?", a: ["3", "0", "1", "3.3"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 2: Functions & Scope",
-            questions: [
-                { q: "Keyword to define a function?", a: ["func", "def", "define", "function"], c: 1 },
-                { q: "Arguments in function header are?", a: ["Formal", "Actual", "Local", "Global"], c: 0 },
-                { q: "Default parameter values are evaluated at?", a: ["Call time", "Definition time", "Never", "Runtime"], c: 1 },
-                { q: "Scope of variable defined in function body?", a: ["Global", "Local", "Static", "Permanent"], c: 1 },
-                { q: "A function not returning any value returns?", a: ["0", "False", "None", "Null"], c: 2 },
-                { q: "Which keyword allows modifying a global variable inside a function?", a: ["global", "extern", "static", "public"], c: 0 },
-                { q: "A function that calls itself is?", a: ["Infinite", "Recursive", "Nested", "Static"], c: 1 },
-                { q: "Positional arguments must be passed?", a: ["Before keyword args", "After keyword args", "Anywhere", "Not required"], c: 0 },
-                { q: "Function header ends with?", a: [";", ".", ":", ","], c: 2 },
-                { q: "Namespace for built-in functions is?", a: ["__main__", "__builtins__", "global", "local"], c: 1 }
-            ]
-        },
-        {
-            title: "Set 3: File Handling (Text)",
-            questions: [
-                { q: "Mode to open file for both reading and writing (no overwrite)?", a: ["r+", "w+", "a+", "rw"], c: 0 },
-                { q: "Method to read all lines as a list?", a: ["read()", "readline()", "readlines()", "list()"], c: 2 },
-                { q: "Method to write a list of strings?", a: ["write()", "writelines()", "writeall()", "put()"], c: 1 },
-                { q: "Escape sequence for newline?", a: ["/n", "\\t", "\\n", "\\r"], c: 2 },
-                { q: "Function used to force writing of buffered data?", a: ["flush()", "close()", "save()", "sync()"], c: 0 },
-                { q: "Which method is used to move the file pointer?", a: ["tell()", "seek()", "move()", "shift()"], c: 1 },
-                { q: "The default mode for open() is?", a: ["'w'", "'r'", "'a'", "'rb'"], c: 1 },
-                { q: "What does open('f.txt', 'w') do if the file exists?", a: ["Error", "Appends", "Overwrites", "Nothing"], c: 2 },
-                { q: "The 'with' statement automatically?", a: ["Opens file", "Closes file", "Reads file", "Deletes file"], c: 1 },
-                { q: "Which method returns the current pointer position?", a: ["seek()", "tell()", "where()", "pos()"], c: 1 }
-            ]
-        },
-        {
-            title: "Set 4: Binary & CSV Files",
-            questions: [
-                { q: "Pickle method to write data to binary file?", a: ["write()", "dump()", "load()", "save()"], c: 1 },
-                { q: "The tell() method returns?", a: ["File size", "Current pointer pos", "Line count", "Mode"], c: 1 },
-                { q: "CSV module method to write a dictionary row?", a: ["writer()", "writerow()", "DictWriter()", "dump()"], c: 2 },
-                { q: "Binary file open mode for appending?", a: ["a", "ab", "ab+", "ba"], c: 1 },
-                { q: "Standard delimiter in CSV?", a: [";", "Tab", "Space", "Comma"], c: 3 },
-                { q: "Which module is needed for binary file handling?", a: ["os", "sys", "pickle", "json"], c: 2 },
-                { q: "Pickle.load() returns?", a: ["String", "Bytes", "Original Object", "None"], c: 2 },
-                { q: "newline='' in open() for CSV prevents?", a: ["Data loss", "Empty rows", "Errors", "Slow speed"], c: 1 },
-                { q: "CSV writer method for multiple rows?", a: ["writerows()", "writeall()", "putrows()", "dump()"], c: 0 },
-                { q: "Binary files store data in?", a: ["ASCII", "Unicode", "Internal Format", "Plain Text"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 5: Exception Handling",
-            questions: [
-                { q: "Which block always executes regardless of an error?", a: ["try", "except", "else", "finally"], c: 3 },
-                { q: "Error raised when dividing by zero?", a: ["ValueError", "ArithmeticError", "ZeroDivisionError", "NumError"], c: 2 },
-                { q: "Keyword to manually trigger an error?", a: ["throw", "raise", "error", "trigger"], c: 1 },
-                { q: "Error when using an undefined variable?", a: ["NameError", "TypeError", "ValueError", "SyntaxError"], c: 0 },
-                { q: "Block that runs if NO exception occurs?", a: ["finally", "else", "catch", "try"], c: 1 },
-                { q: "Base class for all built-in exceptions?", a: ["Error", "BaseException", "Exception", "Root"], c: 1 },
-                { q: "Error when wrong type of data is passed to function?", a: ["TypeError", "ValueError", "AttributeError", "KeyError"], c: 0 },
-                { q: "Can we have multiple except blocks?", a: ["Yes", "No", "Only two", "Depends"], c: 0 },
-                { q: "What happens if an exception is not handled?", a: ["Program continues", "System crash", "Program terminates", "Silent ignore"], c: 2 },
-                { q: "IndexError occurs when?", a: ["File missing", "Key missing", "Index out of range", "Zero division"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 6: Data Structures (Stack)",
-            questions: [
-                { q: "Stack follows which logic?", a: ["FIFO", "LILO", "LIFO", "Priority"], c: 2 },
-                { q: "List method for Push?", a: ["insert()", "push()", "append()", "add()"], c: 2 },
-                { q: "List method for Pop?", a: ["pop()", "remove()", "delete()", "clear()"], c: 0 },
-                { q: "Removing from empty stack is?", a: ["Overflow", "Underflow", "EmptyError", "Null"], c: 1 },
-                { q: "The 'Top' in a list stack `S` is at index?", a: ["0", "len(S)-1", "len(S)", "1"], c: 1 },
-                { q: "Peek operation returns?", a: ["Bottom element", "Top element", "Middle element", "Size"], c: 1 },
-                { q: "Pushing to a full stack is?", a: ["Underflow", "Overflow", "FullError", "Error"], c: 1 },
-                { q: "Stack is a ______ data structure?", a: ["Non-linear", "Linear", "Tree", "Graph"], c: 1 },
-                { q: "Real-world example of stack?", a: ["Queue at bank", "Pile of plates", "Assembly line", "Circular road"], c: 1 },
-                { q: "How many ends does a stack use for insertion/deletion?", a: ["Two", "Zero", "One", "Three"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 7: Database Concepts",
-            questions: [
-                { q: "A row in a table is called a?", a: ["Attribute", "Degree", "Tuple", "Domain"], c: 2 },
-                { q: "Number of columns in a table is?", a: ["Cardinality", "Degree", "Dimension", "Set"], c: 1 },
-                { q: "Primary key cannot have ____ values?", a: ["Null", "Unique", "Numeric", "String"], c: 0 },
-                { q: "A candidate key not chosen as Primary key is?", a: ["Foreign key", "Alternate key", "Super key", "Null key"], c: 1 },
-                { q: "Attribute used to link two tables?", a: ["Primary Key", "Foreign Key", "Unique Key", "Check Key"], c: 1 },
-                { q: "Number of rows in a table is?", a: ["Degree", "Cardinality", "Size", "Count"], c: 1 },
-                { q: "The pool of values for a column is?", a: ["Range", "Domain", "Field", "Type"], c: 1 },
-                { q: "Can a table have multiple Foreign Keys?", a: ["Yes", "No", "Only one", "Max two"], c: 0 },
-                { q: "Every Primary Key is also a?", a: ["Foreign Key", "Candidate Key", "Alternate Key", "Check Key"], c: 1 },
-                { q: "Relational database consists of a collection of?", a: ["Fields", "Tables", "Files", "Paths"], c: 1 }
-            ]
-        },
-        {
-            title: "Set 8: SQL Fundamentals",
-            questions: [
-                { q: "Which is a DDL command?", a: ["INSERT", "UPDATE", "CREATE", "SELECT"], c: 2 },
-                { q: "Command to remove all records but keep structure?", a: ["DROP", "DELETE", "TRUNCATE", "REMOVE"], c: 2 },
-                { q: "Operator to search for patterns?", a: ["LIKE", "IN", "BETWEEN", "MATCH"], c: 0 },
-                { q: "Keyword to remove duplicate results?", a: ["UNIQUE", "DISTINCT", "SINGLE", "ALL"], c: 1 },
-                { q: "Clause used to sort results?", a: ["SORT BY", "ALIGN BY", "ORDER BY", "GROUP BY"], c: 2 },
-                { q: "To check for empty values, use?", a: ["= NULL", "IS NULL", "EMPTY", "== NULL"], c: 1 },
-                { q: "DDL stands for?", a: ["Data Definition Language", "Data Design Logic", "Data Dual Link", "None"], c: 0 },
-                { q: "Command to add a new column?", a: ["INSERT", "ALTER", "UPDATE", "ADD"], c: 1 },
-                { q: "Standard wildcard for multiple characters in LIKE?", a: ["?", "*", "%", "_"], c: 2 },
-                { q: "Clause to filter rows based on conditions?", a: ["HAVING", "GROUP BY", "WHERE", "ORDER BY"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 9: Aggregation & Joins",
-            questions: [
-                { q: "Function to find total number of rows?", a: ["SUM()", "TOTAL()", "COUNT()", "ADD()"], c: 2 },
-                { q: "Clause used with aggregate functions?", a: ["HAVING", "WHERE", "ORDER", "LIKE"], c: 0 },
-                { q: "JOIN based on common column values?", a: ["Outer Join", "Equi Join", "Cross Join", "Self Join"], c: 1 },
-                { q: "To filter groups, we use?", a: ["WHERE", "HAVING", "GROUP", "LIMIT"], c: 1 },
-                { q: "Result of COUNT(*) on 5 rows with 1 Null?", a: ["4", "5", "Null", "Error"], c: 1 },
-                { q: "Aggregate function that returns largest value?", a: ["HIGH()", "GREATEST()", "MAX()", "TOP()"], c: 2 },
-                { q: "SUM() can be used with?", a: ["Strings", "Numbers", "Dates", "All types"], c: 1 },
-                { q: "GROUP BY must appear ______ WHERE clause?", a: ["Before", "After", "Inside", "Instead of"], c: 1 },
-                { q: "Cartesian product of table A(3 rows) and B(4 rows)?", a: ["7", "1", "12", "0"], c: 2 },
-                { q: "Natural Join is an Equi-join where?", a: ["Nulls match", "Columns differ", "Duplicate cols removed", "Primary keys match"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 10: Python-SQL Interface",
-            questions: [
-                { q: "Module to connect Python with MySQL?", a: ["mysql-connector", "sqllink", "db-python", "mysql.client"], c: 0 },
-                { q: "Method to establish connection?", a: ["open()", "connect()", "link()", "start()"], c: 1 },
-                { q: "Object used to execute SQL queries?", a: ["Link", "Pointer", "Cursor", "Bridge"], c: 2 },
-                { q: "Method to fetch only one row?", a: ["fetchone()", "fetch1()", "getrow()", "row()"], c: 0 },
-                { q: "Method to save changes to DB?", a: ["save()", "push()", "commit()", "update()"], c: 2 },
-                { q: "Result of cursor.fetchall() is a?", a: ["List of tuples", "Dictionary", "Tuple of lists", "Single string"], c: 0 },
-                { q: "Attribute to find row count after SELECT?", a: ["size", "rowcount", "length", "count"], c: 1 },
-                { q: "Is 'commit()' required for SELECT query?", a: ["Yes", "No", "Mandatory", "Sometimes"], c: 1 },
-                { q: "Argument to execute() to prevent SQL injection?", a: ["String concat", "Parameterized query", "None", "Encryption"], c: 1 },
-                { q: "Method to check if connection is active?", a: ["is_active()", "is_connected()", "ping()", "status()"], c: 1 }
-            ]
-        },
-        {
-            title: "Set 11: Network Basics",
-            questions: [
-                { q: "Largest geographical network type?", a: ["LAN", "MAN", "WAN", "PAN"], c: 2 },
-                { q: "Topology where all nodes connect to central hub?", a: ["Bus", "Star", "Ring", "Mesh"], c: 1 },
-                { q: "Device used to connect two dissimilar networks?", a: ["Bridge", "Switch", "Gateway", "Repeater"], c: 2 },
-                { q: "Speed of data transfer is measured in?", a: ["Bps", "Hz", "Watts", "Pixels"], c: 0 },
-                { q: "Protocol used for file transfer?", a: ["HTTP", "FTP", "TCP", "SMTP"], c: 1 },
-                { q: "Standard for wireless networking?", a: ["802.11", "802.3", "IPX", "POP"], c: 0 },
-                { q: "Device used to regenerate signals for long distances?", a: ["Hub", "Switch", "Repeater", "Router"], c: 2 },
-                { q: "Network for a single person's workspace?", a: ["LAN", "PAN", "WAN", "MAN"], c: 1 },
-                { q: "Logical address of a computer is?", a: ["MAC", "IP", "Port", "DNS"], c: 1 },
-                { q: "OSI model has how many layers?", a: ["5", "6", "7", "8"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 12: Network Media & Protocols",
-            questions: [
-                { q: "Fastest wired transmission medium?", a: ["Twisted Pair", "Coaxial", "Fiber Optics", "Ethernet"], c: 2 },
-                { q: "Short range wireless technology?", a: ["Microwave", "Radio Wave", "Bluetooth", "Infrared"], c: 2 },
-                { q: "Protocol for IP address resolution?", a: ["DNS", "ARP", "DHCP", "ICMP"], c: 0 },
-                { q: "Port number for HTTP?", a: ["21", "25", "80", "443"], c: 2 },
-                { q: "Network with 'token passing' logic?", a: ["Bus", "Star", "Ring", "Tree"], c: 2 },
-                { q: "Secure version of HTTP is?", a: ["HTTPP", "HTTPS", "S-HTTP", "HTTPO"], c: 1 },
-                { q: "Protocol used to send emails?", a: ["POP3", "IMAP", "SMTP", "HTTP"], c: 2 },
-                { q: "Connector used for Ethernet cables?", a: ["RJ-11", "RJ-45", "USB", "BNC"], c: 1 },
-                { q: "Cable used for TV signals?", a: ["Coaxial", "Twisted Pair", "STP", "Fiber"], c: 0 },
-                { q: "Which media is unaffected by EMI?", a: ["Coaxial", "UTP", "Fiber Optics", "STP"], c: 2 }
-            ]
-        },
-        {
-            title: "Set 13: Web & Security",
-            questions: [
-                { q: "The first page of a website is called?", a: ["Main page", "Intro page", "Home page", "Front page"], c: 2 },
-                { q: "Language used to create web pages?", a: ["XML", "HTML", "HTTP", "URL"], c: 1 },
-                { q: "Unsolicited bulk emails are called?", a: ["Spam", "Phish", "Spoof", "Cookies"], c: 0 },
-                { q: "Software that steals information?", a: ["Adware", "Spyware", "Firmware", "Shareware"], c: 1 },
-                { q: "What is a URL?", a: ["User Link", "Uniform Resource Locator", "Universal Link", "None"], c: 1 },
-                { q: "Data used to track user sessions on browser?", a: ["Caches", "Cookies", "History", "Logs"], c: 1 },
-                { q: "Smallest unit of data on web?", a: ["Byte", "Packet", "Segment", "Frame"], c: 1 },
-                { q: "A website that allows collaborative editing?", a: ["Blog", "Wiki", "E-portal", "Forum"], c: 1 },
-                { q: "Malicious software that replicates?", a: ["Virus", "Worm", "Trojan", "Rootkit"], c: 1 },
-                { q: "A person who breaks security for good?", a: ["Cracker", "White Hat Hacker", "Script Kiddie", "Phreaker"], c: 1 }
-            ]
-        },
-        {
-            title: "Set 14: Cyber Ethics",
-            questions: [
-                { q: "Stealing someone's work/ideas?", a: ["Phishing", "Plagiarism", "Hacking", "Spamming"], c: 1 },
-                { q: "Legal right of a creator over work?", a: ["Patent", "Copyright", "Trademark", "License"], c: 1 },
-                { q: "Trail of data we leave online?", a: ["Digital footprint", "Web log", "Cookie", "History"], c: 0 },
-                { q: "Free software where source is available?", a: ["Freeware", "OSS", "Proprietary", "Shareware"], c: 1 },
-                { q: "Expansion of IPR?", a: ["Intelligent Property", "Intellectual Property Rights", "Internet Rights", "None"], c: 1 },
-                { q: "Net Neutrality means?", a: ["Equal speed for all", "Free internet", "No filters", "Paid fast lanes"], c: 0 },
-                { q: "Cyber bullying includes?", a: ["Hacking", "Harassment via internet", "Coding", "Gaming"], c: 1 },
-                { q: "The 'E' in E-Waste stands for?", a: ["Electrical", "Electronic", "Enhanced", "Energy"], c: 1 },
-                { q: "Digital Footprints can be?", a: ["Active", "Passive", "Both A & B", "None"], c: 2 },
-                { q: "GPL stands for?", a: ["General Public License", "Global Public Law", "Grid Path Link", "None"], c: 0 }
-            ]
-        },
-        {
-            title: "Set 15: Mixed Bag (Board Level)",
-            questions: [
-                { q: "Function `round(12.5)` in Python 3?", a: ["12", "13", "12.0", "13.0"], c: 0 },
-                { q: "Command `ALTER TABLE` is used for?", a: ["Update data", "Change structure", "Delete table", "Insert row"], c: 1 },
-                { q: "Which layer handles routing in OSI?", a: ["Data link", "Physical", "Network", "Transport"], c: 2 },
-                { q: "Python list slice `L[::-1]` does?", a: ["Clear", "Reverse", "Copy", "Error"], c: 1 },
-                { q: "Maximum value of a 4-bit unsigned int?", a: ["16", "15", "8", "4"], c: 1 },
-                { q: "Which file type is machine independent?", a: ["Binary", "Text", "None", "Both"], c: 1 },
-                { q: "Is Python Case-sensitive?", a: ["Yes", "No", "Depends", "Only for vars"], c: 0 },
-                { q: "Logical operator with highest priority?", a: ["OR", "AND", "NOT", "Equal"], c: 2 },
-                { q: "Primary function of a router?", a: ["Routing", "Switching", "Filtering", "Amplifying"], c: 0 },
-                { q: "The command to exit from Python shell?", a: ["stop()", "quit()", "exit()", "Both B & C"], c: 3 }
-            ]
-        }
+        { title: "Python Basics Review", category: "Python", icon: "🐍", questions: [
+            { q: "Which of the following is an invalid identifier?", a: ["_total", "1st_name", "Salary", "None"], c: 1 },
+            { q: "What is the output of 14 // 3?", a: ["4", "4.66", "2", "4.0"], c: 0 },
+            { q: "Which is an immutable type?", a: ["List", "Set", "Tuple", "Dictionary"], c: 2 },
+            { q: "Value of '2' + '3'?", a: ["5", "'5'", "'23'", "Error"], c: 2 },
+            { q: "d = {'a':1}. What is d.get('b', 0)?", a: ["0", "None", "Error", "1"], c: 0 },
+            { q: "Output of 'Hello'[1:3]?", a: ["He", "el", "ell", "lo"], c: 1 },
+            { q: "Which operator has the highest precedence?", a: ["+", "*", "**", "/"], c: 2 },
+            { q: "Output of bool([])?", a: ["True", "False", "None", "Error"], c: 1 },
+            { q: "Which function converts a string to a list of characters?", a: ["split()", "list()", "join()", "strip()"], c: 1 },
+            { q: "Result of 10 % 3?", a: ["3", "0", "1", "3.3"], c: 2 }
+        ]},
+        { title: "Functions & Scope", category: "Python", icon: "⚙️", questions: [
+            { q: "Keyword to define a function?", a: ["func", "def", "define", "function"], c: 1 },
+            { q: "Arguments in function header are?", a: ["Formal", "Actual", "Local", "Global"], c: 0 },
+            { q: "Default parameter values are evaluated at?", a: ["Call time", "Definition time", "Never", "Runtime"], c: 1 },
+            { q: "Scope of variable defined in function body?", a: ["Global", "Local", "Static", "Permanent"], c: 1 },
+            { q: "A function not returning any value returns?", a: ["0", "False", "None", "Null"], c: 2 },
+            { q: "Which keyword allows modifying a global variable inside a function?", a: ["global", "extern", "static", "public"], c: 0 },
+            { q: "A function that calls itself is?", a: ["Infinite", "Recursive", "Nested", "Static"], c: 1 },
+            { q: "Positional arguments must be passed?", a: ["Before keyword args", "After keyword args", "Anywhere", "Not required"], c: 0 },
+            { q: "Function header ends with?", a: [";", ".", ":", ","], c: 2 },
+            { q: "Namespace for built-in functions is?", a: ["__main__", "__builtins__", "global", "local"], c: 1 }
+        ]},
+        { title: "Text File Handling", category: "Files", icon: "📄", questions: [
+            { q: "Mode to open file for both reading and writing (no overwrite)?", a: ["r+", "w+", "a+", "rw"], c: 0 },
+            { q: "Method to read all lines as a list?", a: ["read()", "readline()", "readlines()", "list()"], c: 2 },
+            { q: "Method to write a list of strings?", a: ["write()", "writelines()", "writeall()", "put()"], c: 1 },
+            { q: "Escape sequence for newline?", a: ["/n", "\\t", "\\n", "\\r"], c: 2 },
+            { q: "Function used to force writing of buffered data?", a: ["flush()", "close()", "save()", "sync()"], c: 0 },
+            { q: "Which method is used to move the file pointer?", a: ["tell()", "seek()", "move()", "shift()"], c: 1 },
+            { q: "The default mode for open() is?", a: ["'w'", "'r'", "'a'", "'rb'"], c: 1 },
+            { q: "What does open('f.txt', 'w') do if the file exists?", a: ["Error", "Appends", "Overwrites", "Nothing"], c: 2 },
+            { q: "The 'with' statement automatically?", a: ["Opens file", "Closes file", "Reads file", "Deletes file"], c: 1 },
+            { q: "Which method returns the current pointer position?", a: ["seek()", "tell()", "where()", "pos()"], c: 1 }
+        ]},
+        { title: "Binary & CSV Files", category: "Files", icon: "📊", questions: [
+            { q: "Pickle method to write data to binary file?", a: ["write()", "dump()", "load()", "save()"], c: 1 },
+            { q: "The tell() method returns?", a: ["File size", "Current pointer pos", "Line count", "Mode"], c: 1 },
+            { q: "CSV module method to write a dictionary row?", a: ["writer()", "writerow()", "DictWriter()", "dump()"], c: 2 },
+            { q: "Binary file open mode for appending?", a: ["a", "ab", "ab+", "ba"], c: 1 },
+            { q: "Standard delimiter in CSV?", a: [";", "Tab", "Space", "Comma"], c: 3 },
+            { q: "Which module is needed for binary file handling?", a: ["os", "sys", "pickle", "json"], c: 2 },
+            { q: "Pickle.load() returns?", a: ["String", "Bytes", "Original Object", "None"], c: 2 },
+            { q: "newline='' in open() for CSV prevents?", a: ["Data loss", "Empty rows", "Errors", "Slow speed"], c: 1 },
+            { q: "CSV writer method for multiple rows?", a: ["writerows()", "writeall()", "putrows()", "dump()"], c: 0 },
+            { q: "Binary files store data in?", a: ["ASCII", "Unicode", "Internal Format", "Plain Text"], c: 2 }
+        ]},
+        { title: "Exception Handling", category: "Python", icon: "⚠️", questions: [
+            { q: "Which block always executes regardless of an error?", a: ["try", "except", "else", "finally"], c: 3 },
+            { q: "Error raised when dividing by zero?", a: ["ValueError", "ArithmeticError", "ZeroDivisionError", "NumError"], c: 2 },
+            { q: "Keyword to manually trigger an error?", a: ["throw", "raise", "error", "trigger"], c: 1 },
+            { q: "Error when using an undefined variable?", a: ["NameError", "TypeError", "ValueError", "SyntaxError"], c: 0 },
+            { q: "Block that runs if NO exception occurs?", a: ["finally", "else", "catch", "try"], c: 1 },
+            { q: "Base class for all built-in exceptions?", a: ["Error", "BaseException", "Exception", "Root"], c: 1 },
+            { q: "Error when wrong type of data is passed to function?", a: ["TypeError", "ValueError", "AttributeError", "KeyError"], c: 0 },
+            { q: "Can we have multiple except blocks?", a: ["Yes", "No", "Only two", "Depends"], c: 0 },
+            { q: "What happens if an exception is not handled?", a: ["Program continues", "System crash", "Program terminates", "Silent ignore"], c: 2 },
+            { q: "IndexError occurs when?", a: ["File missing", "Key missing", "Index out of range", "Zero division"], c: 2 }
+        ]},
+        { title: "Stack Data Structure", category: "Python", icon: "📚", questions: [
+            { q: "Stack follows which logic?", a: ["FIFO", "LILO", "LIFO", "Priority"], c: 2 },
+            { q: "List method for Push?", a: ["insert()", "push()", "append()", "add()"], c: 2 },
+            { q: "List method for Pop?", a: ["pop()", "remove()", "delete()", "clear()"], c: 0 },
+            { q: "Removing from empty stack is?", a: ["Overflow", "Underflow", "EmptyError", "Null"], c: 1 },
+            { q: "The 'Top' in a list stack `S` is at index?", a: ["0", "len(S)-1", "len(S)", "1"], c: 1 },
+            { q: "Peek operation returns?", a: ["Bottom element", "Top element", "Middle element", "Size"], c: 1 },
+            { q: "Pushing to a full stack is?", a: ["Underflow", "Overflow", "FullError", "Error"], c: 1 },
+            { q: "Stack is a ______ data structure?", a: ["Non-linear", "Linear", "Tree", "Graph"], c: 1 },
+            { q: "Real-world example of stack?", a: ["Queue at bank", "Pile of plates", "Assembly line", "Circular road"], c: 1 },
+            { q: "How many ends does a stack use for insertion/deletion?", a: ["Two", "Zero", "One", "Three"], c: 2 }
+        ]},
+        { title: "Database Concepts", category: "Database", icon: "🗄️", questions: [
+            { q: "A row in a table is called a?", a: ["Attribute", "Degree", "Tuple", "Domain"], c: 2 },
+            { q: "Number of columns in a table is?", a: ["Cardinality", "Degree", "Dimension", "Set"], c: 1 },
+            { q: "Primary key cannot have ____ values?", a: ["Null", "Unique", "Numeric", "String"], c: 0 },
+            { q: "A candidate key not chosen as Primary key is?", a: ["Foreign key", "Alternate key", "Super key", "Null key"], c: 1 },
+            { q: "Attribute used to link two tables?", a: ["Primary Key", "Foreign Key", "Unique Key", "Check Key"], c: 1 },
+            { q: "Number of rows in a table is?", a: ["Degree", "Cardinality", "Size", "Count"], c: 1 },
+            { q: "The pool of values for a column is?", a: ["Range", "Domain", "Field", "Type"], c: 1 },
+            { q: "Can a table have multiple Foreign Keys?", a: ["Yes", "No", "Only one", "Max two"], c: 0 },
+            { q: "Every Primary Key is also a?", a: ["Foreign Key", "Candidate Key", "Alternate Key", "Check Key"], c: 1 },
+            { q: "Relational database consists of a collection of?", a: ["Fields", "Tables", "Files", "Paths"], c: 1 }
+        ]},
+        { title: "SQL Fundamentals", category: "Database", icon: "💻", questions: [
+            { q: "Which is a DDL command?", a: ["INSERT", "UPDATE", "CREATE", "SELECT"], c: 2 },
+            { q: "Command to remove all records but keep structure?", a: ["DROP", "DELETE", "TRUNCATE", "REMOVE"], c: 2 },
+            { q: "Operator to search for patterns?", a: ["LIKE", "IN", "BETWEEN", "MATCH"], c: 0 },
+            { q: "Keyword to remove duplicate results?", a: ["UNIQUE", "DISTINCT", "SINGLE", "ALL"], c: 1 },
+            { q: "Clause used to sort results?", a: ["SORT BY", "ALIGN BY", "ORDER BY", "GROUP BY"], c: 2 },
+            { q: "To check for empty values, use?", a: ["= NULL", "IS NULL", "EMPTY", "== NULL"], c: 1 },
+            { q: "DDL stands for?", a: ["Data Definition Language", "Data Design Logic", "Data Dual Link", "None"], c: 0 },
+            { q: "Command to add a new column?", a: ["INSERT", "ALTER", "UPDATE", "ADD"], c: 1 },
+            { q: "Standard wildcard for multiple characters in LIKE?", a: ["?", "*", "%", "_"], c: 2 },
+            { q: "Clause to filter rows based on conditions?", a: ["HAVING", "GROUP BY", "WHERE", "ORDER BY"], c: 2 }
+        ]},
+        { title: "SQL Aggregation", category: "Database", icon: "🖇️", questions: [
+            { q: "Function to find total number of rows?", a: ["SUM()", "TOTAL()", "COUNT()", "ADD()"], c: 2 },
+            { q: "Clause used with aggregate functions?", a: ["HAVING", "WHERE", "ORDER", "LIKE"], c: 0 },
+            { q: "JOIN based on common column values?", a: ["Outer Join", "Equi Join", "Cross Join", "Self Join"], c: 1 },
+            { q: "To filter groups, we use?", a: ["WHERE", "HAVING", "GROUP", "LIMIT"], c: 1 },
+            { q: "Result of COUNT(*) on 5 rows with 1 Null?", a: ["4", "5", "Null", "Error"], c: 1 },
+            { q: "Aggregate function that returns largest value?", a: ["HIGH()", "GREATEST()", "MAX()", "TOP()"], c: 2 },
+            { q: "SUM() can be used with?", a: ["Strings", "Numbers", "Dates", "All types"], c: 1 },
+            { q: "GROUP BY must appear ______ WHERE clause?", a: ["Before", "After", "Inside", "Instead of"], c: 1 },
+            { q: "Cartesian product of table A(3 rows) and B(4 rows)?", a: ["7", "1", "12", "0"], c: 2 },
+            { q: "Natural Join is an Equi-join where?", a: ["Nulls match", "Columns differ", "Duplicate cols removed", "Primary keys match"], c: 2 }
+        ]},
+        { title: "Python-SQL Link", category: "Database", icon: "🔗", questions: [
+            { q: "Module to connect Python with MySQL?", a: ["mysql-connector", "sqllink", "db-python", "mysql.client"], c: 0 },
+            { q: "Method to establish connection?", a: ["open()", "connect()", "link()", "start()"], c: 1 },
+            { q: "Object used to execute SQL queries?", a: ["Link", "Pointer", "Cursor", "Bridge"], c: 2 },
+            { q: "Method to fetch only one row?", a: ["fetchone()", "fetch1()", "getrow()", "row()"], c: 0 },
+            { q: "Method to save changes to DB?", a: ["save()", "push()", "commit()", "update()"], c: 2 },
+            { q: "Result of cursor.fetchall() is a?", a: ["List of tuples", "Dictionary", "Tuple of lists", "Single string"], c: 0 },
+            { q: "Attribute to find row count after SELECT?", a: ["size", "rowcount", "length", "count"], c: 1 },
+            { q: "Is 'commit()' required for SELECT query?", a: ["Yes", "No", "Mandatory", "Sometimes"], c: 1 },
+            { q: "Argument to execute() to prevent SQL injection?", a: ["String concat", "Parameterized query", "None", "Encryption"], c: 1 },
+            { q: "Method to check if connection is active?", a: ["is_active()", "is_connected()", "ping()", "status()"], c: 1 }
+        ]},
+        { title: "Network Basics", category: "Network", icon: "🌐", questions: [
+            { q: "Largest geographical network type?", a: ["LAN", "MAN", "WAN", "PAN"], c: 2 },
+            { q: "Topology where all nodes connect to central hub?", a: ["Bus", "Star", "Ring", "Mesh"], c: 1 },
+            { q: "Device used to connect two dissimilar networks?", a: ["Bridge", "Switch", "Gateway", "Repeater"], c: 2 },
+            { q: "Speed of data transfer is measured in?", a: ["Bps", "Hz", "Watts", "Pixels"], c: 0 },
+            { q: "Protocol used for file transfer?", a: ["HTTP", "FTP", "TCP", "SMTP"], c: 1 },
+            { q: "Standard for wireless networking?", a: ["802.11", "802.3", "IPX", "POP"], c: 0 },
+            { q: "Device used to regenerate signals for long distances?", a: ["Hub", "Switch", "Repeater", "Router"], c: 2 },
+            { q: "Network for a single person's workspace?", a: ["LAN", "PAN", "WAN", "MAN"], c: 1 },
+            { q: "Logical address of a computer is?", a: ["MAC", "IP", "Port", "DNS"], c: 1 },
+            { q: "OSI model has how many layers?", a: ["5", "6", "7", "8"], c: 2 }
+        ]},
+        { title: "Media & Protocols", category: "Network", icon: "🛰️", questions: [
+            { q: "Fastest wired transmission medium?", a: ["Twisted Pair", "Coaxial", "Fiber Optics", "Ethernet"], c: 2 },
+            { q: "Short range wireless technology?", a: ["Microwave", "Radio Wave", "Bluetooth", "Infrared"], c: 2 },
+            { q: "Protocol for IP address resolution?", a: ["DNS", "ARP", "DHCP", "ICMP"], c: 0 },
+            { q: "Port number for HTTP?", a: ["21", "25", "80", "443"], c: 2 },
+            { q: "Network with 'token passing' logic?", a: ["Bus", "Star", "Ring", "Tree"], c: 2 },
+            { q: "Secure version of HTTP is?", a: ["HTTPP", "HTTPS", "S-HTTP", "HTTPO"], c: 1 },
+            { q: "Protocol used to send emails?", a: ["POP3", "IMAP", "SMTP", "HTTP"], c: 2 },
+            { q: "Connector used for Ethernet cables?", a: ["RJ-11", "RJ-45", "USB", "BNC"], c: 1 },
+            { q: "Cable used for TV signals?", a: ["Coaxial", "Twisted Pair", "STP", "Fiber"], c: 0 },
+            { q: "Which media is unaffected by EMI?", a: ["Coaxial", "UTP", "Fiber Optics", "STP"], c: 2 }
+        ]},
+        { title: "Web & Security", category: "Network", icon: "🛡️", questions: [
+            { q: "The first page of a website is called?", a: ["Main page", "Intro page", "Home page", "Front page"], c: 2 },
+            { q: "Language used to create web pages?", a: ["XML", "HTML", "HTTP", "URL"], c: 1 },
+            { q: "Unsolicited bulk emails are called?", a: ["Spam", "Phish", "Spoof", "Cookies"], c: 0 },
+            { q: "Software that steals information?", a: ["Adware", "Spyware", "Firmware", "Shareware"], c: 1 },
+            { q: "What is a URL?", a: ["User Link", "Uniform Resource Locator", "Universal Link", "None"], c: 1 },
+            { q: "Data used to track user sessions on browser?", a: ["Caches", "Cookies", "History", "Logs"], c: 1 },
+            { q: "Smallest unit of data on web?", a: ["Byte", "Packet", "Segment", "Frame"], c: 1 },
+            { q: "A website that allows collaborative editing?", a: ["Blog", "Wiki", "E-portal", "Forum"], c: 1 },
+            { q: "Malicious software that replicates?", a: ["Virus", "Worm", "Trojan", "Rootkit"], c: 1 },
+            { q: "A person who breaks security for good?", a: ["Cracker", "White Hat Hacker", "Script Kiddie", "Phreaker"], c: 1 }
+        ]},
+        { title: "Cyber Ethics & OSS", category: "Society", icon: "⚖️", questions: [
+            { q: "Stealing someone's work/ideas?", a: ["Phishing", "Plagiarism", "Hacking", "Spamming"], c: 1 },
+            { q: "Legal right of a creator over work?", a: ["Patent", "Copyright", "Trademark", "License"], c: 1 },
+            { q: "Trail of data we leave online?", a: ["Digital footprint", "Web log", "Cookie", "History"], c: 0 },
+            { q: "Free software where source is available?", a: ["Freeware", "OSS", "Proprietary", "Shareware"], c: 1 },
+            { q: "Expansion of IPR?", a: ["Intelligent Property", "Intellectual Property Rights", "Internet Rights", "None"], c: 1 },
+            { q: "Net Neutrality means?", a: ["Equal speed for all", "Free internet", "No filters", "Paid fast lanes"], c: 0 },
+            { q: "Cyber bullying includes?", a: ["Hacking", "Harassment via internet", "Coding", "Gaming"], c: 1 },
+            { q: "The 'E' in E-Waste stands for?", a: ["Electrical", "Electronic", "Enhanced", "Energy"], c: 1 },
+            { q: "Digital Footprints can be?", a: ["Active", "Passive", "Both A & B", "None"], c: 2 },
+            { q: "GPL stands for?", a: ["General Public License", "Global Public Law", "Grid Path Link", "None"], c: 0 }
+        ]},
+        { title: "Board Mixed Bag", category: "Mixed", icon: "🎓", questions: [
+            { q: "Function `round(12.5)` in Python 3?", a: ["12", "13", "12.0", "13.0"], c: 0 },
+            { q: "Command `ALTER TABLE` is used for?", a: ["Update data", "Change structure", "Delete table", "Insert row"], c: 1 },
+            { q: "Which layer handles routing in OSI?", a: ["Data link", "Physical", "Network", "Transport"], c: 2 },
+            { q: "Python list slice `L[::-1]` does?", a: ["Clear", "Reverse", "Copy", "Error"], c: 1 },
+            { q: "Maximum value of a 4-bit unsigned int?", a: ["16", "15", "8", "4"], c: 1 },
+            { q: "Which file type is machine independent?", a: ["Binary", "Text", "None", "Both"], c: 1 },
+            { q: "Is Python Case-sensitive?", a: ["Yes", "No", "Depends", "Only for vars"], c: 0 },
+            { q: "Logical operator with highest priority?", a: ["OR", "AND", "NOT", "Equal"], c: 2 },
+            { q: "Primary function of a router?", a: ["Routing", "Switching", "Filtering", "Amplifying"], c: 0 },
+            { q: "The command to exit from Python shell?", a: ["stop()", "quit()", "exit()", "Both B & C"], c: 3 }
+        ]}
     ];
 
     let currentSetIndex = 0;
@@ -403,7 +413,7 @@
                 await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
             }
         }
-        return "Error connecting to AI.";
+        return "I'm having trouble connecting to my brain! Please try again in a moment.";
     }
 
     async function getAIExplanation() {
@@ -411,14 +421,18 @@
         const box = document.getElementById('ai-explanation-box');
         const text = document.getElementById('ai-explanation-text');
         const loader = document.getElementById('explainer-loading');
+        
         btn.disabled = true;
         btn.classList.add('opacity-50');
         box.classList.remove('hidden');
         loader.classList.remove('hidden');
         text.innerText = "Consulting Gemini AI...";
+        
         const q = quizData[currentSetIndex].questions[currentQuestionIndex];
-        const prompt = `Question: ${q.q}\nCorrect Answer: ${q.a[q.c]}\n\nExplain why this is correct in 2 sentences for Class 12 CBSE context.`;
-        text.innerText = await callGemini(prompt);
+        const prompt = `Question: ${q.q}\nCorrect Answer: ${q.a[q.c]}\n\nExplain why this is correct and why other options are wrong (if applicable) in 2 sentences for Class 12 CBSE context. Use simple language.`;
+        
+        const response = await callGemini(prompt);
+        text.innerText = response;
         loader.classList.add('hidden');
     }
 
@@ -427,35 +441,65 @@
         const container = document.getElementById('chat-messages');
         const query = input.value.trim();
         if (!query) return;
+
         const userMsg = document.createElement('div');
-        userMsg.className = 'bg-white p-3 rounded-lg rounded-tr-none text-sm shadow-sm border self-end max-w-[85%] ml-auto';
+        userMsg.className = 'bg-white p-4 rounded-2xl rounded-tr-none text-sm shadow-sm border border-slate-200 self-end max-w-[85%] ml-auto';
         userMsg.innerText = query;
         container.appendChild(userMsg);
+        
         input.value = '';
         container.scrollTop = container.scrollHeight;
+
         const botMsg = document.createElement('div');
-        botMsg.className = 'bg-blue-100 p-3 rounded-lg rounded-tl-none text-sm text-blue-900 self-start max-w-[85%] italic animate-pulse';
-        botMsg.innerText = '✨ Thinking...';
+        botMsg.className = 'bg-blue-100 p-4 rounded-2xl rounded-tl-none text-sm text-blue-900 self-start max-w-[85%] italic animate-pulse border border-blue-200 shadow-sm';
+        botMsg.innerText = '✨ Gemini is typing...';
         container.appendChild(botMsg);
         container.scrollTop = container.scrollHeight;
-        const response = await callGemini(query, "You are a professional Class 12 CS Tutor.");
+
+        const response = await callGemini(query, "You are a professional Class 12 CS Tutor. Be encouraging and clear.");
         botMsg.classList.remove('italic', 'animate-pulse');
         botMsg.innerText = response;
         container.scrollTop = container.scrollHeight;
     }
 
-    function toggleChat() { document.getElementById('ai-chat-widget').classList.toggle('hidden'); }
+    function toggleChat() { 
+        const chat = document.getElementById('ai-chat-widget');
+        chat.classList.toggle('hidden');
+    }
 
-    // --- QUIZ ENGINE ---
+    // --- UI CONTROLS ---
+    function showHome() {
+        document.getElementById('landing-screen').classList.remove('hidden');
+        document.getElementById('quiz-container').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function initApp() {
-        const navContainer = document.getElementById('nav-container');
+        const tilesGrid = document.getElementById('tiles-grid');
         quizData.forEach((set, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'set-nav-btn w-full text-left px-4 py-3 rounded-lg text-sm transition hover:bg-slate-700 flex items-center gap-3';
-            btn.dataset.index = index;
-            btn.innerHTML = `<span class="w-6 h-6 rounded-md bg-slate-700 flex items-center justify-center text-[10px] font-bold">${index + 1}</span> ${set.title}`;
-            btn.onclick = () => loadSet(index);
-            navContainer.appendChild(btn);
+            const tile = document.createElement('button');
+            tile.className = 'quiz-tile bg-white border border-slate-200 p-8 rounded-[2rem] text-left hover:border-blue-500 transition shadow-sm';
+            tile.onclick = () => loadSet(index);
+            tile.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <div class="w-14 h-14 bg-slate-50 text-slate-800 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-slate-100">
+                        ${set.icon || '📖'}
+                    </div>
+                    <span class="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-1 rounded tracking-widest uppercase">Set ${index + 1}</span>
+                </div>
+                <h4 class="font-black text-slate-900 text-xl leading-tight mb-2">${set.title}</h4>
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">${set.category}</p>
+                </div>
+                <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <span class="text-xs font-bold text-slate-400">10 Questions</span>
+                    <div class="flex items-center gap-1 text-blue-600 text-sm font-bold">
+                        Solve <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                </div>
+            `;
+            tilesGrid.appendChild(tile);
         });
     }
 
@@ -466,34 +510,56 @@
         document.getElementById('landing-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.add('hidden');
         document.getElementById('question-screen').classList.remove('hidden');
+        document.getElementById('quiz-container').classList.remove('hidden');
         document.getElementById('set-title').innerText = quizData[index].title;
-        document.querySelectorAll('.set-nav-btn').forEach(btn => btn.classList.toggle('bg-blue-600', parseInt(btn.dataset.index) === index));
+        document.getElementById('category-badge').innerText = quizData[index].category;
+        
         displayQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function displayQuestion() {
         const q = quizData[currentSetIndex].questions[currentQuestionIndex];
         answered = false;
+        
         document.getElementById('ai-explanation-box').classList.add('hidden');
         document.getElementById('ai-explain-btn').classList.add('hidden');
-        document.getElementById('progress-text').innerText = `Question ${currentQuestionIndex + 1} of 10`;
-        document.getElementById('score-text').innerText = `Score: ${score}`;
+        document.getElementById('ai-explain-btn').disabled = false;
+        document.getElementById('ai-explain-btn').classList.remove('opacity-50');
+        
+        document.getElementById('progress-text').innerText = `${currentQuestionIndex + 1} / 10`;
+        document.getElementById('score-text').innerText = `${Math.round((score/10)*100)}%`;
         document.getElementById('question-text').innerText = q.q;
+        
         const container = document.getElementById('options-container');
         container.innerHTML = '';
+        
         q.a.forEach((option, idx) => {
             const btn = document.createElement('button');
-            btn.className = 'option-btn w-full text-left p-4 border-2 border-gray-100 rounded-xl font-medium text-slate-700 flex items-center gap-4';
-            btn.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center text-sm font-bold bg-gray-50">${String.fromCharCode(65 + idx)}</span> ${option}`;
+            btn.className = 'option-btn w-full text-left p-5 border-2 border-slate-100 rounded-2xl font-bold text-slate-700 flex items-center gap-5 bg-white';
+            btn.innerHTML = `<span class="w-10 h-10 rounded-xl border-2 flex items-center justify-center text-sm font-black bg-slate-50 transition-colors">${String.fromCharCode(65 + idx)}</span> <span class="flex-1">${option}</span>`;
+            
             btn.onclick = () => {
                 if (answered) return;
                 answered = true;
-                if (idx === q.c) { btn.classList.add('correct'); score++; } 
-                else { btn.classList.add('incorrect'); document.querySelectorAll('.option-btn')[q.c].classList.add('correct'); }
+                
+                const span = btn.querySelector('span');
+                if (idx === q.c) { 
+                    btn.classList.add('correct'); 
+                    span.classList.add('bg-emerald-500', 'border-emerald-500', 'text-white');
+                    score++; 
+                } else { 
+                    btn.classList.add('incorrect'); 
+                    span.classList.add('bg-rose-500', 'border-rose-500', 'text-white');
+                    const correctBtn = document.querySelectorAll('.option-btn')[q.c];
+                    correctBtn.classList.add('correct');
+                    correctBtn.querySelector('span').classList.add('bg-emerald-500', 'border-emerald-500', 'text-white');
+                }
+                
                 document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
                 document.getElementById('next-btn').classList.remove('hidden');
                 document.getElementById('ai-explain-btn').classList.remove('hidden');
-                document.getElementById('score-text').innerText = `Score: ${score}`;
+                document.getElementById('score-text').innerText = `${Math.round((score/10)*100)}%`;
             };
             container.appendChild(btn);
         });
@@ -502,8 +568,9 @@
 
     function nextQuestion() {
         currentQuestionIndex++;
-        if (currentQuestionIndex < 10) displayQuestion();
-        else {
+        if (currentQuestionIndex < 10) {
+            displayQuestion();
+        } else {
             document.getElementById('question-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = `${score} / 10`;
@@ -511,6 +578,7 @@
     }
 
     function restartSet() { loadSet(currentSetIndex); }
+    
     window.onload = initApp;
 </script>
 </body>
